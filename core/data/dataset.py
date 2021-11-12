@@ -3,10 +3,10 @@ import torch
 from cv2 import cv2
 from torch.utils.data import Dataset
 
-from common.services.dataset_config_service import DataConfigService, DATASET_TYPE
+from common.services.dataset_config_service import DataConfigService, DATASET_TYPE,\
+    IMAGE_NET_PIXEL_MEAN, IMAGE_NET_PIXEL_STD_DEVIATION
 from common.services.dataset_load_service import DataLoadService
-from common.services.dataset_transform_service import DataTransformService, IMAGE_NET_PIXEL_MEAN, \
-    IMAGE_NET_PIXEL_STD_DEVIATION
+from common.services.dataset_transform_service import DataTransformService
 
 
 class DialButtonDataset(Dataset):
@@ -61,9 +61,10 @@ class DialButtonDataset(Dataset):
         self.dial_keyboards[index].do_affine_transform_on_buttons(transform_matrix)
 
         # generate label for heatmap
-        label = None
+        label = self.dial_keyboards[index].generate_heatmap(sigma=2, bound=3, heatmap_width=96, heatmap_height=96)
 
         # get reinforced button point location for AE method
         self.dial_keyboards[index].calculate_reinforced_button_points()
+        ground_truth_points = self.dial_keyboards[index].aggregate_reinforced_points()
 
-        return tensor_like_img, label,
+        return tensor_like_img, label, ground_truth_points

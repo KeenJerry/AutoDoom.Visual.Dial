@@ -1,15 +1,9 @@
 import numpy as np
-import torch
 from numpy import ndarray
 from cv2 import cv2
 
+from common.services.dataset_config_service import DST_HEIGHT, DST_WIDTH
 from common.tools.transform import rotate_2d_point
-
-
-_DST_HEIGHT = 384
-_DST_WIDTH = 384
-IMAGE_NET_PIXEL_MEAN: list[float] = [123.67500, 116.28000, 103.53000]
-IMAGE_NET_PIXEL_STD_DEVIATION: list[float] = [58.39500, 57.12000, 57.37500]
 
 
 class DataTransformService:
@@ -42,13 +36,13 @@ class DataTransformService:
 
         # calculate dst_points
         if src_height >= src_width:
-            actual_width = _DST_HEIGHT * src_width / src_height
-            actual_height = _DST_HEIGHT
+            actual_width = DST_HEIGHT * src_width / src_height
+            actual_height = DST_HEIGHT
         else:
-            actual_width = _DST_WIDTH
-            actual_height = _DST_WIDTH * src_height / src_width
+            actual_width = DST_WIDTH
+            actual_height = DST_WIDTH * src_height / src_width
 
-        center_offset = center_offset_rate * np.array([_DST_WIDTH, _DST_HEIGHT])
+        center_offset = center_offset_rate * np.array([DST_WIDTH, DST_HEIGHT])
 
         dst_point1 = np.zeros(2) + center_offset
         dst_point2 = dst_point1 + np.array([0, actual_height * scale])
@@ -62,7 +56,7 @@ class DataTransformService:
 
     @staticmethod
     def do_image_affine_transform(img, transform_matrix):
-        return cv2.warpAffine(img, transform_matrix, (_DST_WIDTH, _DST_HEIGHT), flags=cv2.INTER_CUBIC)
+        return cv2.warpAffine(img, transform_matrix, (DST_WIDTH, DST_HEIGHT), flags=cv2.INTER_CUBIC)
 
     @staticmethod
     def make_img_tensor_like(img):

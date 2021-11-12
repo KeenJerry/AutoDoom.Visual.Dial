@@ -6,6 +6,11 @@ from enum import Enum
 _ROOT_DIR = Path(os.path.curdir).parent.parent
 DATASET_TYPE = Enum("DATA_TYPE", ("train", "test"))
 
+DST_HEIGHT = 384
+DST_WIDTH = 384
+IMAGE_NET_PIXEL_MEAN: list[float] = [123.67500, 116.28000, 103.53000]
+IMAGE_NET_PIXEL_STD_DEVIATION: list[float] = [58.39500, 57.12000, 57.37500]
+
 
 def _get_data_root() -> str:
     return os.path.join(_ROOT_DIR, "data_source")
