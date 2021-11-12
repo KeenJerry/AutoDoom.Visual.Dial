@@ -64,7 +64,7 @@ class DataTransformService:
         tensor_like_image = np.transpose(tensor_like_image, (2, 0, 1))
 
         tensor_like_image = tensor_like_image[::-1, :, :]
-        return tensor_like_image.astype(np.float)
+        return tensor_like_image
 
     @staticmethod
     def do_point_affine_transform(point, transform_matrix):

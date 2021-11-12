@@ -61,10 +61,10 @@ class DialButtonDataset(Dataset):
         self.dial_keyboards[index].do_affine_transform_on_buttons(transform_matrix)
 
         # generate label for heatmap
-        label = self.dial_keyboards[index].generate_heatmap(sigma=2, bound=3, heatmap_width=96, heatmap_height=96)
+        label: ndarray = self.dial_keyboards[index].generate_heatmap(sigma=2, bound=3, heatmap_width=96, heatmap_height=96)
 
         # get reinforced button point location for AE method
         self.dial_keyboards[index].calculate_reinforced_button_points()
-        ground_truth_points = self.dial_keyboards[index].aggregate_reinforced_points()
+        ground_truth_points: ndarray = self.dial_keyboards[index].aggregate_reinforced_points()
 
-        return tensor_like_img, label, ground_truth_points
+        return tensor_like_img.astype(np.float), label.astype(np.float), ground_truth_points.astype(np.float)

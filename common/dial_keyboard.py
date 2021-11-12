@@ -1,6 +1,7 @@
 import ntpath
 
 import numpy as np
+from numpy import ndarray
 
 from common.dial_button import DialButton
 from common.tools.gaussian import generate_gaussian_core
@@ -21,7 +22,7 @@ class DialKeyboard:
         for i in range(len(self.dial_buttons)):
             self.dial_buttons[i].calculate_reinforced_points()
 
-    def generate_heatmap(self, sigma, bound, heatmap_width, heatmap_height):
+    def generate_heatmap(self, sigma, bound, heatmap_width, heatmap_height) -> ndarray:
         label_channel_number = 5
         label = np.array((label_channel_number, heatmap_width, heatmap_height), np.float)
         gaussian_core = generate_gaussian_core(sigma, bound)
@@ -29,7 +30,7 @@ class DialKeyboard:
             self.dial_buttons[i].draw_heatmap(gaussian_core, heatmap_width, heatmap_height, label)
         return label
 
-    def aggregate_reinforced_points(self):
+    def aggregate_reinforced_points(self) -> ndarray:
         ground_truth_points = np.array((120, 4, 3))
         for i in range(len(self.dial_buttons)):
             ground_truth_points[i] = self.dial_buttons[i].aggregate_reinforced_points()
