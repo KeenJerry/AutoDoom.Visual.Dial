@@ -26,14 +26,6 @@ class DialButtonDataset(Dataset):
         else:
             self.dial_keyboards = DataLoadService.load_dial_keyboards(dataset_type)
 
-    def _make_point_matrix(self, index):
-        dial_buttons = self.dial_keyboards[index].dial_buttons
-        button_number = len(dial_buttons)
-        result_matrix = torch.zeros(button_number, 4, 2)
-        # for i in range(button_number):
-        #     result_matrix[i] =
-
-
     def __len__(self):
         return len(self.dial_keyboards)
 
@@ -66,20 +58,12 @@ class DialButtonDataset(Dataset):
                                               IMAGE_NET_PIXEL_MEAN[channel]) / IMAGE_NET_PIXEL_STD_DEVIATION[channel]
 
         # apply affine transform to dial button point
-        dial_buttons = self.dial_keyboards[index].dial_buttons
-        for i in range(len(dial_buttons)):
-            dial_button = dial_buttons[i]
-            dial_button.center = DataTransformService.do_point_affine_transform(dial_button.center, transform_matrix)
-            dial_button.left_top_point = DataTransformService.do_point_affine_transform(
-                dial_button.left_top_point, transform_matrix)
-            dial_button.left_bottom_point = DataTransformService.do_point_affine_transform(
-                dial_button.left_bottom_point, transform_matrix)
-            dial_button.right_top_point = DataTransformService.do_point_affine_transform(
-                dial_button.right_top_point, transform_matrix)
-            dial_button.right_bottom_point = DataTransformService.do_point_affine_transform(
-                dial_button.right_bottom_point, transform_matrix)
+        self.dial_keyboards[index].do_affine_transform_on_buttons(transform_matrix)
 
         # generate label for heatmap
+        label = None
 
         # get reinforced button point location for AE method
-        # reinforced_points =
+        self.dial_keyboards[index].calculate_reinforced_button_points()
+
+        return tensor_like_img, label,

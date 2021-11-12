@@ -74,4 +74,4 @@ class DataTransformService:
 
     @staticmethod
     def do_point_affine_transform(point, transform_matrix):
-        return torch.Tensor(np.dot(transform_matrix, np.array([point[0], point[1], 1.0]).T)[0: 2])
+        return np.dot(transform_matrix, np.array([point[0], point[1], 1.0]).T)[0: 2]

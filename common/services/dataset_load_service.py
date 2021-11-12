@@ -5,6 +5,7 @@ import numpy as np
 from numpy import ndarray
 
 from common.services.dataset_config_service import DataConfigService, DATASET_TYPE
+from common.services.dataset_transform_service import DataTransformService
 from common.tools.parser import parse_json_file
 
 
@@ -18,6 +19,45 @@ class DialButton:
         self.center = np.mean(np.vstack((self.left_top_point, self.left_bottom_point, self.right_bottom_point,
                                          self.right_top_point)), axis=0)
 
+        self.reinforced_left_top_point = np.zeros(3)
+        self.reinforced_left_bottom_point = np.zeros(3)
+        self.reinforced_right_bottom_point = np.zeros(3)
+        self.reinforced_right_top_point = np.zeros(3)
+
+    def do_affine_transform(self, transform_matrix):
+        self.center = DataTransformService.do_point_affine_transform(
+            self.center, transform_matrix)
+        self.left_top_point = DataTransformService.do_point_affine_transform(
+            self.left_top_point, transform_matrix)
+        self.left_bottom_point = DataTransformService.do_point_affine_transform(
+            self.left_bottom_point, transform_matrix)
+        self.right_top_point = DataTransformService.do_point_affine_transform(
+            self.right_top_point, transform_matrix)
+        self.right_bottom_point = DataTransformService.do_point_affine_transform(
+            self.right_bottom_point, transform_matrix)
+
+    def calculate_reinforced_points(self):
+        temp_left_bottom_point = (self.reinforced_left_bottom_point / 4 + 0.5).astype(int)
+        temp_left_top_point = (self.reinforced_left_top_point / 4 + 0.5).astype(int)
+        temp_right_top_point = (self.reinforced_right_top_point / 4 + 0.5).astype(int)
+        temp_right_bottom_point = (self.reinforced_right_bottom_point / 4 + 0.5).astype(int)
+
+        self.reinforced_left_bottom_point = np.array([0 * 96 * 96 + temp_left_bottom_point[1] * 96 +
+                                                      temp_left_bottom_point[0], 1,
+                                                      temp_left_bottom_point[0] + temp_left_bottom_point[1]])
+
+        self.reinforced_right_top_point = np.array([0 * 96 * 96 + temp_right_top_point[1] * 96 +
+                                                      temp_right_top_point[0], 1,
+                                                      temp_right_top_point[0] + temp_right_top_point[1]])
+
+        self.reinforced_left_top_point = np.array([0 * 96 * 96 + temp_left_top_point[1] * 96 +
+                                                      temp_left_top_point[0], 1,
+                                                      temp_left_top_point[0] + temp_left_top_point[1]])
+
+        self.reinforced_right_bottom_point = np.array([0 * 96 * 96 + temp_right_bottom_point[1] * 96 +
+                                                      temp_right_bottom_point[0], 1,
+                                                      temp_right_bottom_point[0] + temp_right_bottom_point[1]])
+
 
 class DialKeyBoard:
     def __init__(self, dial_buttons: list[DialButton], image_path: ntpath, image_width: int, image_height: int):
@@ -25,6 +65,17 @@ class DialKeyBoard:
         self.image_path = image_path
         self.image_width = image_width
         self.image_height = image_height
+
+    def do_affine_transform_on_buttons(self, transform_matrix):
+        for i in range(len(self.dial_buttons)):
+            self.dial_buttons[i].do_affine_transform(transform_matrix)
+
+    def calculate_reinforced_button_points(self):
+        for i in range(len(self.dial_buttons)):
+            self.dial_buttons[i].calculate_reinforced_points()
+
+    def aggregate_button_points(self):
+        pass
 
 
 class DataLoadService:
