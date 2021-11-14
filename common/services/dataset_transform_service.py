@@ -20,13 +20,13 @@ class DataTransformService:
     def get_transform_matrix(src_height: int, src_width: int, scale: float,
                              rotation: float, center_offset_rate: ndarray):
 
-        src_points = np.zeros(3, 2)
-        dst_points = np.zeros(3, 2)
+        src_points = np.zeros((3, 2))
+        dst_points = np.zeros((3, 2))
 
         # calculate src_points
         rotation_rad = rotation * np.pi / 180.0
 
-        src_point1 = np.zeros(1, 2)
+        src_point1 = np.zeros((1, 2))
         src_point2 = rotate_2d_point(np.array([0, src_height]), rotation_rad)
         src_point3 = rotate_2d_point(np.array([src_width, 0]), rotation_rad)
 
@@ -52,11 +52,12 @@ class DataTransformService:
         dst_points[1, :] = dst_point2
         dst_points[2, :] = dst_point3
 
-        return cv2.getAffineTransform(src_points, dst_points)
+        return cv2.getAffineTransform(np.float32(src_points), np.float32(dst_points))
 
     @staticmethod
     def do_image_affine_transform(img, transform_matrix):
-        return cv2.warpAffine(img, transform_matrix, (DST_WIDTH, DST_HEIGHT), flags=cv2.INTER_CUBIC)
+        img_transformed = cv2.warpAffine(img, transform_matrix, (DST_WIDTH, DST_HEIGHT), flags=cv2.INTER_CUBIC)
+        return img_transformed
 
     @staticmethod
     def make_img_tensor_like(img):
@@ -64,7 +65,7 @@ class DataTransformService:
         tensor_like_image = np.transpose(tensor_like_image, (2, 0, 1))
 
         tensor_like_image = tensor_like_image[::-1, :, :]
-        return tensor_like_image
+        return tensor_like_image.astype(np.float)
 
     @staticmethod
     def do_point_affine_transform(point, transform_matrix):

@@ -4,7 +4,7 @@ from pathlib import Path
 from enum import Enum
 
 _ROOT_DIR = Path(os.path.curdir).parent.parent
-DATASET_TYPE = Enum("DATA_TYPE", ("train", "test"))
+DATASET_TYPE = Enum("DATASET_TYPE", ("train", "test"))
 
 DST_HEIGHT = 384
 DST_WIDTH = 384

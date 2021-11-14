@@ -4,15 +4,15 @@ from torchvision.models.resnet import BasicBlock, Bottleneck
 
 
 class ResNetBackBone(nn.Module):
-    def __init__(self, block: Optional[BasicBlock, Bottleneck], block_num_per_layer: []):
+    def __init__(self, block, block_num_per_layer: []):
         super(ResNetBackBone, self).__init__()
         self.in_channel: int = 64
         # layer tools
-        self.convd1: nn.Conv2d = nn.Conv2d(in_channels=3, out_channels=self.in_channel, kernel_size=(7, 7),
-                                           stride=(2, 2), padding=3, bias=False)
+        self.conv1: nn.Conv2d = nn.Conv2d(in_channels=3, out_channels=self.in_channel, kernel_size=(7, 7),
+                                          stride=(2, 2), padding=3, bias=False)
         self.bn1: nn.BatchNorm2d = nn.BatchNorm2d(self.in_channel)
         self.relu: nn.ReLU = nn.ReLU(inplace=True)
-        self.max_pool1: nn.MaxPool2d = nn.MaxPool2d(kernel_size=3, stride=(2, 2), padding=1)
+        self.maxpool: nn.MaxPool2d = nn.MaxPool2d(kernel_size=3, stride=(2, 2), padding=1)
 
         self.layer1: nn.Sequential = self._make_layer(block, 64, block_num_per_layer[0], stride=(1, 1))
         self.layer2: nn.Sequential = self._make_layer(block, 128, block_num_per_layer[1], stride=(2, 2))
@@ -24,7 +24,7 @@ class ResNetBackBone(nn.Module):
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
 
-    def _make_layer(self, block: Optional[BasicBlock, Bottleneck], channel: int,
+    def _make_layer(self, block, channel: int,
                     block_num: int, stride: tuple = (1, 1)) -> nn.Sequential:
         down_sample: Optional[nn.Sequential, None] = None
         if stride[0] != 1 or self.in_channel != channel * block.expansion:
@@ -42,10 +42,10 @@ class ResNetBackBone(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        x = self.convd1(x)
+        x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
-        x = self.max_pool1(x)
+        x = self.maxpool(x)
 
         x = self.layer1(x)
         x = self.layer2(x)

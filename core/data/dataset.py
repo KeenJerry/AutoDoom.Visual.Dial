@@ -1,12 +1,13 @@
 import numpy as np
-import torch
 from cv2 import cv2
+from numpy import ndarray
 from torch.utils.data import Dataset
 
 from common.services.dataset_config_service import DataConfigService, DATASET_TYPE,\
     IMAGE_NET_PIXEL_MEAN, IMAGE_NET_PIXEL_STD_DEVIATION
 from common.services.dataset_load_service import DataLoadService
 from common.services.dataset_transform_service import DataTransformService
+from common.tools.visualization import debug_vis
 
 
 class DialButtonDataset(Dataset):
@@ -32,7 +33,7 @@ class DialButtonDataset(Dataset):
     def __getitem__(self, index: int):
         img = cv2.imread(self.dial_keyboards[index].image_path, cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION)
 
-        img_width, img_height, img_channels = img.shape
+        img_height, img_width, img_channels = img.shape
 
         # get transform parameters
         scale, rotation, center_offset_rate, color_scale_rate = DataTransformService.random_transform_parameters()
@@ -43,8 +44,7 @@ class DialButtonDataset(Dataset):
 
         # do affine transform
         transformed_img = DataTransformService.do_image_affine_transform(img.copy(), transform_matrix)
-        if __debug__:
-            cv2.imshow(img)
+
         # make transformed img tensor like
         # the shape should be [channels, height, width] and pixel format should be RGB not BGR
         tensor_like_img = DataTransformService.make_img_tensor_like(transformed_img)
@@ -61,10 +61,16 @@ class DialButtonDataset(Dataset):
         self.dial_keyboards[index].do_affine_transform_on_buttons(transform_matrix)
 
         # generate label for heatmap
-        label: ndarray = self.dial_keyboards[index].generate_heatmap(sigma=2, bound=3, heatmap_width=96, heatmap_height=96)
+        label: ndarray = self.dial_keyboards[index].generate_heatmap(sigma=2, bound=3, heatmap_width=96,
+                                                                     heatmap_height=96)
+
+        # if necessary, display the transformed image and label
+        # cv2.imshow("transformed image", transformed_img)
+        # cv2.imshow("center label", label[4])
+        # cv2.waitKey(0)
 
         # get reinforced button point location for AE method
         self.dial_keyboards[index].calculate_reinforced_button_points()
         ground_truth_points: ndarray = self.dial_keyboards[index].aggregate_reinforced_points()
 
-        return tensor_like_img.astype(np.float), label.astype(np.float), ground_truth_points.astype(np.float)
+        return tensor_like_img.astype(np.float32), label.astype(np.float32), ground_truth_points.astype(np.float32)

@@ -51,10 +51,10 @@ class DialButton:
             self.right_bottom_point, transform_matrix)
 
     def calculate_reinforced_points(self):
-        temp_left_bottom_point = (self.reinforced_left_bottom_point / 4 + 0.5).astype(int)
-        temp_left_top_point = (self.reinforced_left_top_point / 4 + 0.5).astype(int)
-        temp_right_top_point = (self.reinforced_right_top_point / 4 + 0.5).astype(int)
-        temp_right_bottom_point = (self.reinforced_right_bottom_point / 4 + 0.5).astype(int)
+        temp_left_bottom_point = (self.left_bottom_point / 4 + 0.5).astype(int)
+        temp_left_top_point = (self.left_top_point / 4 + 0.5).astype(int)
+        temp_right_top_point = (self.right_top_point / 4 + 0.5).astype(int)
+        temp_right_bottom_point = (self.right_bottom_point / 4 + 0.5).astype(int)
 
         self.reinforced_left_bottom_point = np.array([0 * 96 * 96 + temp_left_bottom_point[1] * 96 +
                                                       temp_left_bottom_point[0], 1,
@@ -73,7 +73,7 @@ class DialButton:
                                                        temp_right_bottom_point[0] + temp_right_bottom_point[1]])
 
     def draw_heatmap(self, gaussian_core, heatmap_width, heatmap_height, label):
-        gaussian_radius = gaussian_core.shape[0] / 2
+        gaussian_radius = int(gaussian_core.shape[0] / 2)
         g_x, g_y, img_x, img_y = _get_heatmap_overlap(self.left_top_point, gaussian_radius, heatmap_width,
                                                       heatmap_height)
         if g_x is not None:

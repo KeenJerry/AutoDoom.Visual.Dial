@@ -24,14 +24,14 @@ class DialKeyboard:
 
     def generate_heatmap(self, sigma, bound, heatmap_width, heatmap_height) -> ndarray:
         label_channel_number = 5
-        label = np.array((label_channel_number, heatmap_width, heatmap_height), np.float)
+        label = np.zeros((label_channel_number, heatmap_width, heatmap_height), np.float)
         gaussian_core = generate_gaussian_core(sigma, bound)
         for i in range(len(self.dial_buttons)):
             self.dial_buttons[i].draw_heatmap(gaussian_core, heatmap_width, heatmap_height, label)
         return label
 
     def aggregate_reinforced_points(self) -> ndarray:
-        ground_truth_points = np.array((120, 4, 3))
+        ground_truth_points = np.zeros((120, 4, 3))
         for i in range(len(self.dial_buttons)):
             ground_truth_points[i] = self.dial_buttons[i].aggregate_reinforced_points()
         return ground_truth_points

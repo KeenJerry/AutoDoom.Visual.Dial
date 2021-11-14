@@ -29,7 +29,7 @@ class DialLoss(nn.Module):
         heatmap_loss = self.heatmap_loss(predict_heatmap, ground_truth_heatmap)
 
         # calculate pull_push_loss
-        pull_push_loss = pull_push_loss_func(predict_tagmap, ground_truth_points, 12)
+        pull_push_loss = pull_push_loss_func(predict_tagmap, ground_truth_points, expected_distance=12)
 
         return heatmap_loss + pull_push_loss
 

@@ -2,8 +2,10 @@ import torch
 
 
 def pull_push_loss_func(predict_tagmap, ground_truth_points, expected_distance):
+    ground_truth_points = ground_truth_points.type(dtype=torch.int64)
     batch_size, max_dial_button_number, point_number, _ = ground_truth_points.shape
     epsilon = 1e-6
+    predict_tagmap = predict_tagmap.reshape(batch_size, -1)
 
     pull_losses = []
     push_losses = []
@@ -16,7 +18,7 @@ def pull_push_loss_func(predict_tagmap, ground_truth_points, expected_distance):
 
         # get tag value of all points
         all_point_tag_values = predict_tagmap[i, point_locations_on_tagmap].reshape(max_dial_button_number,
-                                                                                    point_number - 1, 1)
+                                                                                    point_number, 1)
 
         # prepare universal parameters for push and pull losses
         button_center_tag_values = []
@@ -45,9 +47,9 @@ def pull_push_loss_func(predict_tagmap, ground_truth_points, expected_distance):
 
                 # calculate min and max position
                 if button_position > max_button_position:
-                    max_point_position = button_position
+                    max_button_position = button_position
                 if button_position < min_button_position:
-                    min_point_position = button_position
+                    min_button_position = button_position
             else:
                 break
 
