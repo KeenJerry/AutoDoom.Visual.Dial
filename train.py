@@ -11,7 +11,7 @@ from core.loss.dial_loss import DialLoss
 from core.loss.optimizer import get_optimizer, get_scheduler
 from core.net.dialnet import DialNet
 from core.net.model_state import ModelState
-from core.process import train_dialnet
+from core.process import train_dialnet, test_dialnet
 
 
 def _main() -> None:
@@ -62,7 +62,7 @@ def _main() -> None:
 
         # run updated network on test dataset
         test_begin_time = time.time()
-        test_loss = 0
+        test_loss = test_dialnet(dial_net, test_dataloader, dial_loss_func)
         test_end_time = time.time()
 
         # update scheduler
@@ -74,10 +74,9 @@ def _main() -> None:
         network_model_state.save()
 
         logging.info(
-            "EPOCH NUMBER: {} END, train_time: {:.2f}, test_time: {:.2f}, train_loss: {:.2f}, test_loss: {:.2f}, LR: {}".
-            format(epoch, train_end_time - train_begin_time, test_end_time - test_begin_time, train_loss,
-                   0.00, scheduler.get_last_lr()
-                   )
+            "EPOCH NUMBER: {} END, train_time: {:.2f}s, test_time: {:.2f}s, train_loss: {:.2f}, test_loss: {:.2f},"
+            " LR: {}".format(epoch, train_end_time - train_begin_time, test_end_time - test_begin_time, train_loss,
+                             0.00, scheduler.get_last_lr())
         )
 
 

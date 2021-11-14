@@ -13,5 +13,11 @@ class LossRecorder:
     def get_avg_loss(self):
         return (self.sum / self.item_count).item()
 
+    def reset(self):
+        self.sum = torch.zeros(1).cuda()
+        self.item_count = 0
 
-loss_recorder = LossRecorder()
+
+train_loss_recorder = LossRecorder()
+
+test_loss_recorder = LossRecorder()
