@@ -1,9 +1,9 @@
 import ntpath
 import os
-from pathlib import Path
 from enum import Enum
 
-_ROOT_DIR = Path(os.path.curdir).parent.parent
+from common.services.project_config_service import ROOT_DIR
+
 DATASET_TYPE = Enum("DATASET_TYPE", ("train", "test"))
 
 DST_HEIGHT = 384
@@ -13,7 +13,7 @@ IMAGE_NET_PIXEL_STD_DEVIATION: list[float] = [58.39500, 57.12000, 57.37500]
 
 
 def _get_data_root() -> str:
-    return os.path.join(_ROOT_DIR, "data_source")
+    return os.path.join(ROOT_DIR, "data_source")
 
 
 class DataConfigService:
@@ -31,3 +31,5 @@ class DataConfigService:
     @staticmethod
     def get_json_file_root(dataset_type: DATASET_TYPE) -> ntpath:
         return os.path.join(_get_data_root(), "json_files", dataset_type.name)
+
+

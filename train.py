@@ -1,27 +1,38 @@
+import logging
+import time
+
 from torch.utils.data import DataLoader
 
 from common.services.dataset_config_service import DATASET_TYPE
-from common.services.trainning_config_service import TOTAL_EPOCH
+from common.services.trainning_config_service import TOTAL_EPOCH, LR
 from common.tools.parallels import DataParallelModel, DataParallelCriterion
 from core.data.dataset import DialButtonDataset
 from core.loss.dial_loss import DialLoss
 from core.loss.optimizer import get_optimizer, get_scheduler
 from core.net.dialnet import DialNet
+from core.net.model_state import ModelState
 from core.process import train_dialnet
 
 
 def _main() -> None:
     # load data from file
+    logging.info("LOADING TRAIN & TEST DATASET...")
     train_dataset = DialButtonDataset(DATASET_TYPE.train)
     test_dataset = DialButtonDataset(DATASET_TYPE.test)
 
     train_dataloader = DataLoader(train_dataset, batch_size=16, shuffle=True, num_workers=10)
     test_dataloader = DataLoader(test_dataset, batch_size=16, shuffle=False, num_workers=10)
+    logging.info("Done. \t TRAIN_SIZE: {}, TEST_SIZE: {}, BATCH_SIZE: {}, WORKERS: {}".format(
+        len(train_dataset.dial_keyboards), len(test_dataset.dial_keyboards), train_dataloader.batch_size,
+        train_dataloader.num_workers)
+    )
 
     # load network
+    logging.info("LOADING DIAL_NETWORK...")
     dial_net = DialNet()
     dial_net.init_resnet_backbone()
     dial_net = DataParallelModel(dial_net).cuda()
+    logging.info("Done")
 
     # get optimizer and scheduler
     optimizer = get_optimizer(dial_net)
@@ -30,13 +41,48 @@ def _main() -> None:
     # load loss function
     dial_loss_func = DataParallelCriterion(DialLoss())
 
+    # model state
+    network_model_state = ModelState()
+
+    # log info
+    logging.info("TOTAL_NETWORK_PARAMETERS: {:.2}M".format(sum(p.numel() for p in dial_net.parameters()) / 1000000.0))
+    logging.info("TOTAL_EPOCH: {}, LEARNING_RATE: {}".format(TOTAL_EPOCH, LR))
+    logging.info("TRAIN_DATASET_SIZE: {}, TEST_DATASET_SIZE: {}".format(len(train_dataset.dial_keyboards),
+                                                                        len(test_dataset.dial_keyboards)))
+
+    logging.info("START TRAINING...")
     # run train loop on epoch
     for epoch in range(TOTAL_EPOCH):
-        # run train loop on batch
-        train_loss = train_dialnet(dial_net, train_dataloader, optimizer, dial_loss_func)
+        logging.info("EPOCH NUMBER: {} START...".format(epoch))
 
-    # run updated network on test dataset
+        # run train loop on batch
+        train_begin_time = time.time()
+        train_loss = train_dialnet(dial_net, train_dataloader, optimizer, dial_loss_func)
+        train_end_time = time.time()
+
+        # run updated network on test dataset
+        test_begin_time = time.time()
+        test_loss = 0
+        test_end_time = time.time()
+
+        # update scheduler
+        scheduler.step()
+
+        # update network model state and save
+        network_model_state.update(epoch, dial_net.state_dict(), optimizer.state_dict(), scheduler.state_dict(),
+                                   train_loss, test_loss)
+        network_model_state.save()
+
+        logging.info(
+            "EPOCH NUMBER: {} END, train_time: {:.2f}, test_time: {:.2f}, train_loss: {:.2f}, test_loss: {:.2f}, LR: {}".
+            format(epoch, train_end_time - train_begin_time, test_end_time - test_begin_time, train_loss,
+                   0.00, scheduler.get_last_lr()
+                   )
+        )
 
 
 if __name__ == '__main__':
+    # set logger basic
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s", datefmt="%H:%M:%S")
+
     _main()
