@@ -3,8 +3,8 @@ from cv2 import cv2
 from numpy import ndarray
 from torch.utils.data import Dataset
 
-from common.services.dataset_config_service import DataConfigService, DATASET_TYPE,\
-    IMAGE_NET_PIXEL_MEAN, IMAGE_NET_PIXEL_STD_DEVIATION
+from common.services.dataset_config_service import DataConfigService, DATASET_TYPE, \
+    IMAGE_NET_PIXEL_MEAN, IMAGE_NET_PIXEL_STD_DEVIATION, DST_WIDTH, DST_HEIGHT
 from common.services.dataset_load_service import DataLoadService
 from common.services.dataset_transform_service import DataTransformService
 from common.tools.visualization import debug_vis
@@ -61,8 +61,8 @@ class DialButtonDataset(Dataset):
         self.dial_keyboards[index].do_affine_transform_on_buttons(transform_matrix)
 
         # generate label for heatmap
-        label: ndarray = self.dial_keyboards[index].generate_heatmap(sigma=2, bound=3, heatmap_width=96,
-                                                                     heatmap_height=96)
+        label: ndarray = self.dial_keyboards[index].generate_heatmap(sigma=2, bound=3, heatmap_width=DST_WIDTH / 4,
+                                                                     heatmap_height=DST_HEIGHT / 4)
 
         # if necessary, display the transformed image and label
         # cv2.imshow("transformed image", transformed_img)

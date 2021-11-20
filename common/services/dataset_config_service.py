@@ -6,8 +6,8 @@ from common.services.project_config_service import ROOT_DIR
 
 DATASET_TYPE = Enum("DATASET_TYPE", ("train", "test"))
 
-DST_HEIGHT = 384
-DST_WIDTH = 384
+DST_HEIGHT = 1536
+DST_WIDTH = 1536
 IMAGE_NET_PIXEL_MEAN: list[float] = [123.67500, 116.28000, 103.53000]
 IMAGE_NET_PIXEL_STD_DEVIATION: list[float] = [58.39500, 57.12000, 57.37500]
 

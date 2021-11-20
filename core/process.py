@@ -18,7 +18,9 @@ def train_dialnet(dial_net, train_dataloader, optimizer, loss_function):
         heatmap_label = preprocessed_data[1].cuda()
         ground_truth_points = preprocessed_data[2]
 
+        net_begin_time = time.time()
         predict_heatmap, predict_tagmap = dial_net(tensor_like_image)
+        net_end_time = time.time()
         del tensor_like_image
 
         # calculate loss, avg loss in one batch
@@ -35,8 +37,8 @@ def train_dialnet(dial_net, train_dataloader, optimizer, loss_function):
         train_loss_recorder.update_loss(loss.detach(), train_dataloader.batch_size)
         # logging
         batch_end_time = time.time()
-        logging.info("\tBATCH NUMBER: {}, time: {:.2f}s, loss: {:.2f}".format(index, batch_end_time - batch_begin_time,
-                                                                             loss.item()))
+        logging.info("\tBATCH NUMBER: {}, net_calculate_time: {:.2f}s, total_time: {:.2f}s, loss: {:.2f}".
+                     format(index, net_end_time - net_begin_time, batch_end_time - batch_begin_time, loss.item()))
 
         del loss
 

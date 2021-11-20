@@ -1,7 +1,5 @@
 import os
 
-import torch
-
 from common.services.project_config_service import ROOT_DIR
 
 

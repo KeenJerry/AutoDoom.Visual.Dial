@@ -13,7 +13,7 @@ def pull_push_loss_func(predict_tagmap, ground_truth_points, expected_distance):
     for i in range(batch_size):
         # get all part of ground_truth_points
         point_locations_on_tagmap = ground_truth_points[i, :, :, 0].reshape(-1)
-        point_visibilities = ground_truth_points[i, :, : 1]
+        point_visibilities = ground_truth_points[i, :, :, 1]
         button_positions_on_image = ground_truth_points[i][:, :, 2].float().mean(dim=1)
 
         # get tag value of all points
