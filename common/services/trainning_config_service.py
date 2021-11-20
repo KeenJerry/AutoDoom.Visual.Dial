@@ -1,4 +1,4 @@
-LR = 0.001
+LR = 0.01
 TOTAL_EPOCH = 120
 
 
